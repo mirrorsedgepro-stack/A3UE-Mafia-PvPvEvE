@@ -1,0 +1,64 @@
+name: Build and Publish Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate Mod Configurations
+        run: python Tools/pack_arma_mod.py --validate-only
+
+      - name: Pack PBO Addons and Create Archive
+        run: |
+          TAG_NAME="${{ github.ref_name }}"
+          if [ -z "$TAG_NAME" ] || [ "$TAG_NAME" = "main" ]; then
+            TAG_NAME="v1.0.0"
+          fi
+          python Tools/pack_arma_mod.py --zip "build/A3UE-Mafia-PvPvEvE-${TAG_NAME}.zip"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "A3UE Mafia PvPvEvE Extender ${{ github.ref_name }}"
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            build/*.zip
+            build/@A3UE_Mafia/addons/*.pbo
+          body: |
+            ## Antistasi Ultimate - Mafia PvPvEvE Extender
+
+            ### What's Included:
+            - **4-Way Engine Hostility**: BLUFOR (Occupants), OPFOR (Invaders), INDEP (Rebels), and CIV (Mafia Syndicate).
+            - **Dual Parallel Progression & HQs**: Independent headquarters for Petros and Don Salvatore with interactive HQ raiding.
+            - **Contested Cities & Rackets**: Split town support percentages and protection rackets.
+            - **The Mafia Syndicate Faction**: Complete template with low-tier starter weapons, formal/casual mobster attire, and syndicate vehicles.
+            - **Compiled PBO Addons**:
+              - `A3UE_core.pbo`
+              - `A3UE_functions.pbo`
+              - `A3UE_hals.pbo`
+              - `A3UE_maps.pbo`
+              - `A3UE_templates.pbo`
+              - `A3UE_ultimate.pbo`
+
+            ### Installation:
+            1. Download `A3UE-Mafia-PvPvEvE-${{ github.ref_name }}.zip`.
+            2. Extract `@A3UE_Mafia` into your Arma 3 game directory.
+            3. Load `@A3UE_Mafia` alongside **Antistasi Ultimate** in the Arma 3 Launcher.

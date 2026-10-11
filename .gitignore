@@ -1,6 +1,5 @@
 .vscode/
-.github/
-build
+build/
 *.biprivatekey
 *.log
 *.pbo
