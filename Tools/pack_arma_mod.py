@@ -18,6 +18,10 @@ import zipfile
 import argparse
 import subprocess
 
+# Leftovers of the extender template. They override Antistasi's own Altis mission, trader store and
+# forbidden-item lists, so they are not packed. Delete the folders to drop them for good.
+SKIPPED_ADDONS = {"maps", "hals", "ultimate"}
+
 def create_pbo(source_folder, output_pbo_path, prefix=None):
     """
     Packs a folder into a standard Arma 3 PBO archive with SHA-1 checksum.
@@ -144,6 +148,9 @@ def pack_mod_native(source_dir, dest_dir, zip_output=None):
     addons_source = os.path.join(source_dir, "addons")
     for item in sorted(os.listdir(addons_source)):
         addon_path = os.path.join(addons_source, item)
+        if item in SKIPPED_ADDONS:
+            print(f"[-] Skipping addon '{item}' (extender template examples, not part of the Mafia mod)")
+            continue
         if os.path.isdir(addon_path):
             pbo_json_path = os.path.join(addon_path, "pbo.json")
             prefix = f"x\\A3UE\\addons\\{item}"

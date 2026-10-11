@@ -1,34 +1,35 @@
 /*
     Author: mirrorsedgepro-stack
     Description:
-        Sets up a Syndicate protection racket in the given town.
-        Yields periodic dirty income ticks and informant intel to the Mafia.
+        The Syndicate starts a protection racket in a town. Rackets pay the family every ten minutes
+        and cost the rebels a little support there. Rebels end one by killing its collectors.
     Parameters:
-        0: STRING - City marker name
-        1: OBJECT - Capo / Mafia player initiating the racket
+        0: STRING - city name ("" to pick a town where the rebels are weak)
+    Returns:
+        STRING - the city, or "" if no racket was started
 */
 
-params [["_marker", "", [""]], ["_player", objNull, [objNull]]];
+params [["_city", "", [""]]];
 
-if (_marker == "") exitWith {};
+if (!isServer) exitWith { "" };
 
-if (_marker in A3UE_mafiaRackets) exitWith {
-    ["This town is already under Mafia protection.", "align='center' size='0.8' color='#eab308'"] call A3A_fnc_customHint;
+if (_city == "") then {
+    private _open = citiesX select {
+        !(_x in A3UE_mafiaRackets) && {((A3A_townData getOrDefault [_x, [0, 0, 0, 100]]) select 3) < 60}
+    };
+    if (_open isNotEqualTo []) then { _city = selectRandom _open };
+} else {
+    // accept any spelling of a known town
+    private _idx = citiesX findIf { toLower _x == toLower _city };
+    _city = if (_idx < 0) then { "" } else { citiesX select _idx };
 };
+if (_city == "" || {_city in A3UE_mafiaRackets}) exitWith { "" };
 
-A3UE_mafiaRackets pushBack _marker;
-publicVariable "A3UE_mafiaRackets";
+A3UE_mafiaRackets pushBack _city;
+A3UE_mafiaFunds = A3UE_mafiaFunds + 300;
+[_city, 15] call A3UE_fnc_contestedSupport;
+[0, -3, _city] spawn A3A_fnc_citySupportChange;
 
-// Initial payout & boost
-private _take = 750;
-A3UE_mafiaFunds = A3UE_mafiaFunds + _take;
-publicVariable "A3UE_mafiaFunds";
-
-[_marker, 15] call A3UE_fnc_contestedSupport;
-
-[
-    format ["Protection racket established in %1. Collected %2 € street tax.", _marker, _take],
-    "align='center' size='0.8' color='#a855f7'"
-] call A3A_fnc_customHint;
-
-diag_log format ["[A3UE] Protection racket established in %1 by %2", _marker, _player];
+["racket", [_city], format ["Word on the street: the Syndicate is running protection in %1. Kill its collectors there to break the racket.", _city]] call A3UE_fnc_mafiaNotify;
+["save"] call A3UE_fnc_mafiaState;
+_city

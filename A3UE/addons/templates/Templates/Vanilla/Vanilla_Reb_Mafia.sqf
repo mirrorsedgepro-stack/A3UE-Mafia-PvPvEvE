@@ -31,13 +31,13 @@ private _hasEF = "ef" in A3A_enabledDLC;
 
 private _vehiclesBasic = ["C_Quadbike_01_F"];
 private _vehiclesLightUnarmed = ["C_Offroad_01_F", "C_SUV_01_F", "C_Hatchback_01_F", "C_Hatchback_01_sport_F"];
-private _vehiclesLightArmed = ["I_C_Offroad_02_LMG_F", "B_G_Offroad_01_armed_F"];
+private _vehiclesLightArmed = ["B_G_Offroad_01_armed_F"];
 private _vehiclesAt = ["I_G_Offroad_01_AT_F"];
 private _VehTruck = ["C_Van_01_transport_F", "C_Van_01_box_F"];
 private _vehicleAA = [];
 
-private _vehiclesBoat = ["C_Boat_Civil_01_F", "C_Rubberboat", "I_C_Boat_Transport_02_F"];
-private _vehiclesMedical = ["C_Van_02_medevac_F"];
+private _vehiclesBoat = ["C_Boat_Civil_01_F", "C_Rubberboat"];
+private _vehiclesMedical = [];
 private _vehiclesSupply = ["C_Van_01_box_F", "C_Truck_02_box_F"];
 
 private _vehiclePlane = ["C_Plane_Civil_01_F", "C_Plane_Civil_01_racing_F"];
@@ -57,11 +57,13 @@ if (_hasApex) then {
     _vehiclesCivCar pushBack "C_Offroad_02_unarmed_F";
     _vehiclesLightArmed pushBack "I_C_Offroad_02_LMG_F";
     _vehiclesAt pushBack "I_C_Offroad_02_AT_F";
+    _vehiclesBoat pushBack "I_C_Boat_Transport_02_F";
 };
 
 if (_hasLawsOfWar) then {
     _vehiclesCivCar append ["C_Van_02_vehicle_F", "C_Van_02_transport_F"];
     _VehTruck pushBack "C_Van_02_transport_F";
+    _vehiclesMedical pushBack "C_Van_02_medevac_F";
 };
 
 if (_hasRF) then {
@@ -160,11 +162,6 @@ _initialRebelEquipment append ["Chemlight_red", "Chemlight_yellow", "Chemlight_b
 //////////////////////////////////////
 
 private _rebUniforms = [
-    // Formal & Suits
-    "U_C_FormalSuit_01_black_F",
-    "U_C_FormalSuit_01_gray_F",
-    "U_C_FormalSuit_01_khaki_F",
-    "U_C_FormalSuit_01_blue_F",
     // Mobster Streetwear & Leather
     "U_C_Man_casual_1_F",
     "U_C_Man_casual_2_F",
@@ -176,9 +173,12 @@ private _rebUniforms = [
     "U_I_C_Soldier_Bandit_2_F",
     "U_I_C_Soldier_Bandit_3_F",
     "U_I_C_Soldier_Bandit_4_F",
-    "U_I_C_Soldier_Bandit_5_F",
-    "U_C_E_LooterJacket_01_F"
+    "U_I_C_Soldier_Bandit_5_F"
 ];
+if (_hasArtOfWar) then {
+    _rebUniforms append ["U_C_FormalSuit_01_black_F", "U_C_FormalSuit_01_gray_F", "U_C_FormalSuit_01_khaki_F", "U_C_FormalSuit_01_blue_F"];
+};
+if (_hasContact) then { _rebUniforms pushBack "U_C_E_LooterJacket_01_F" };
 
 private _headgear = [
     "H_Hat_checker",

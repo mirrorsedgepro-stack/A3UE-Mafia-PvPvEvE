@@ -1,48 +1,43 @@
 # Antistasi Ultimate - Mafia PvPvEvE Extender (`A3UE`)
 
-An official-grade Extender for [Antistasi Ultimate](https://github.com/Antistasi-Ultimate-Community/A3-Antistasi-Ultimate) that introduces dynamic 4-way **PvPvEvE** warfare across the map.
+An extender for [Antistasi Ultimate](https://github.com/Antistasi-Ultimate-Community/A3-Antistasi-Ultimate) that adds a crime family, the **Mafia Syndicate**, to the war: an AI faction with a hidden hideout, a Don, protection rackets in the towns and hit squads, which the rebels can raid, rob and behead. Optionally, players can join it.
 
-Instead of fighting only AI Occupants and Invaders, players can now divide into two competing human factions:
-1. **The Traditional Rebel Resistance** (`independent`) fighting for freedom and ideological liberation.
-2. **The Mafia Syndicate** (`civilian` weaponized) fighting for underworld dominance, control of rackets, and territorial power.
-
-Both player-led factions start from the ground up with low-tier equipment, competing against each other while simultaneously battling AI Occupants (`west`) and AI Invaders (`east`).
+The Mafia layer runs entirely on the server. Loaded as a server mod (`-serverMod`), it works on an existing campaign and players need nothing extra. The two faction templates are only needed for new campaigns and must then also be on the client of whoever sets the campaign up.
 
 ---
 
-## Key Features
+## What it does
 
-- **4-Way Engine Hostility**:
-  - `west` (Occupants - AI)
-  - `east` (Invaders - AI)
-  - `resistance` (Rebels - Players / AI)
-  - `civilian` (The Mafia Syndicate - Players / AI)
-  - Native engine target recognition and 4-way hostile combat.
+- **Hideout and the Don**: the Syndicate picks a hideout near a random town, at least 2.5 km from the rebel HQ and 600 m from any military zone. Don Salvatore, two capos and 4 to 10 guards (more as the family gets richer) appear when players come within 1.2 km. Rebels find it by walking within 250 m, by raiding it, or from a dead collector's phone; it then goes on the map.
+- **Rackets**: every 15 to 25 minutes the family starts a protection racket in a town where the rebels are weak (up to 3 plus half the war level). A racket pays the Syndicate every ten minutes and costs the rebels a little support. A collector crew walks the town while players are near; kill all four and the racket is broken, for 250 and some support.
+- **Raids**: the stash crate at the hideout has a "Raid the Syndicate stash" action: a fifth of the family's money (up to 2500) goes to the rebels, once every 30 minutes. Five gunmen come after the raider a few minutes later.
+- **Killing the Don**: costs the Syndicate 35% of its money, pays the rebels 1000 and 5 HR if they did it, and stops new rackets. After 30 minutes a successor takes over at a new hideout.
+- **Sides**: the Mafia fights on Antistasi Ultimate's rival side (east, which it shares with the invaders). Arma has no free fifth side, and the civilian side is used by Antistasi's townspeople.
+- **Player Mafia (experimental, off by default)**: when switched on, players get "Join / Leave the Syndicate" actions. Members move to the Mafia's side, start at the hideout and can rob the rebel HQ crate. Antistasi's rebel systems (arsenal, garage, respawn) were not written for this and it is untested.
+- **Persistence**: funds, rackets, hideout, members and the Don's status are kept in the server profile per map and campaign.
+- **Templates for new campaigns**: "The Mafia Syndicate" as the rebel faction, and "The Mafia Syndicate (rivals)" as the rival faction (the stock L'Ensemble template, reskinned).
 
-- **Dual Parallel Progression & HQs**:
-  - Independent Headquarters for both factions: **Petros** leads the Rebels, while **The Don (Don Salvatore)** commands the Syndicate.
-  - Enforced minimum distance buffer (minimum 2.5km) between starting camps to ensure fair staging.
-  - Separate Arsenals: gear looted into the Mafia ammo crate unlocks equipment exclusively for the Mafia.
+### Admin and Game Master commands
 
-- **HQ Raiding**:
-  - Locate the rival faction's hidden HQ through reconnaissance or interrogation.
-  - Raid the rival HQ ammo crate to siphon cash reserves and plunder stockpiled weapons.
+`["<command>", "<argument>"] call A3UE_fnc_mafiaCommand` on the server:
 
-- **Contested Cities & Rackets**:
-  - Cities dynamically split public sentiment across Occupants, Rebels, and Mafia.
-  - Human Resources (HR) and daily income are split according to town support percentages.
-  - Capos can establish **Protection Rackets** in towns to generate periodic dirty income and informant intel.
+| Command | Argument | Effect |
+|---|---|---|
+| `status` | | funds, rackets, the Don, hideout grid |
+| `relocate` | | move to a new hideout |
+| `racket` | town or `""` | start a racket there, or in a random weak town |
+| `reveal` | | put the hideout on the map |
+| `hit` | player name or `""` | send a hit squad after that (or a random) player |
+| `funds` | amount | add to (or take from) the family's money |
+| `playable` | `on` / `off` | let players join the Syndicate |
 
-- **Syndicate Archetypes & Loadouts**:
-  - **The Don**: Commander archetype in tailored formal suits with revolvers.
-  - **Capo**: Squad leaders in leather/casual jackets with SMGs and radios.
-  - **Enforcer**: Heavy gunners with tac vests and automatic firepower.
-  - **Hitman**: Syndicate marksmen with precision rifles.
-  - **Thug / Soldier**: Street footmen with handguns and shotguns.
+Every event is also written to the server log as `A3UE|<event>|...` (racket, bust, raid, heist, don, found, hit, hq, join, leave).
 
-- **Global War Level & Targeted Aggro**:
-  - War Level scales globally as island conflict intensifies.
-  - AI Occupants and Invaders track Rebel Aggro and Mafia Aggro independently, directing airstrikes and QRFs at whichever faction stirred up trouble.
+### Not done yet
+
+- Nothing here has been run in game yet.
+- No separate Mafia arsenal, no income or HR split by town support, no per-faction enemy aggro.
+- The `maps`, `hals` and `ultimate` folders are untouched examples from the extender template. They are not packed (see `SKIPPED_ADDONS` in `Tools/pack_arma_mod.py`) and can be deleted.
 
 ---
 
@@ -52,14 +47,13 @@ Both player-led factions start from the ground up with low-tier equipment, compe
 A3UE/
 ├── addons/
 │   ├── core/         # Core macros, includes, and stringtables
-│   ├── functions/    # PvPvEvE scripts, 4-way hostility, HQ & Racket logic
+│   ├── functions/    # the server-side Mafia layer
 │   │   └── Mafia/    # Syndicate functions (init, Don boss, HQ raid, rackets)
-│   ├── maps/         # Supported maps and mission descriptions
 │   ├── templates/    # Faction templates and vehicle configs
 │   │   └── Templates/
 │   │       └── Vanilla/
-│   │           └── Vanilla_Reb_Mafia.sqf  # Mafia faction template
-│   └── ultimate/     # Ultimate integration hooks
+│   │           ├── Vanilla_Reb_Mafia.sqf  # Mafia as the rebel faction
+│           └── Vanilla_Riv_Mafia.sqf  # Mafia as the rival faction
 └── mod.cpp           # Mod metadata and author branding
 ```
 

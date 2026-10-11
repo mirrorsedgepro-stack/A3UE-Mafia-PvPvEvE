@@ -1,31 +1,22 @@
 /*
     Author: mirrorsedgepro-stack
     Description:
-        Calculates 3-way town sentiment and contested town support across
-        Occupants, Rebels, and Mafia.
+        Changes and returns the Syndicate's hold on a town. Occupant and rebel support are Antistasi's
+        own figures (A3A_townData); the Mafia's share is kept alongside and can't exceed what the rebels leave.
     Parameters:
-        0: STRING - Marker name of the city
-        1: NUMBER - Mafia influence change (-100 to 100)
+        0: STRING - city name (an entry of citiesX)
+        1: NUMBER - change in Mafia influence
     Returns:
-        ARRAY - [_occSupport, _rebSupport, _mafiaSupport]
+        ARRAY - [occupant support, rebel support, Mafia influence]
 */
 
-params [["_marker", "", [""]], ["_mafiaDelta", 0, [0]]];
+params [["_city", "", [""]], ["_delta", 0, [0]]];
 
-if (_marker == "") exitWith { [0, 0, 0] };
+private _data = A3A_townData getOrDefault [_city, []];
+if (_data isEqualTo []) exitWith { [0, 0, 0] };
+_data params ["", "", "_gov", "_reb"];
 
-private _mafiaSupport = _marker getVariable ["A3UE_mafiaSupport", 0];
-private _rebSupport = _marker getVariable ["support", 0];
-private _occSupport = 100 - _rebSupport - _mafiaSupport;
+private _mafia = ((A3UE_mafiaSupport getOrDefault [_city, 0]) + _delta) max 0 min ((100 - _reb) max 0);
+A3UE_mafiaSupport set [_city, _mafia];
 
-_mafiaSupport = (_mafiaSupport + _mafiaDelta) min (100 - _rebSupport) max 0;
-_occSupport = (100 - _rebSupport - _mafiaSupport) max 0;
-
-_marker setVariable ["A3UE_mafiaSupport", _mafiaSupport, true];
-
-// Trigger marker color shift if Mafia is dominant
-if (_mafiaSupport > _rebSupport && _mafiaSupport > _occSupport) then {
-    _marker setMarkerColor "ColorYellow";
-};
-
-[_occSupport, _rebSupport, _mafiaSupport];
+[_gov, _reb, _mafia]

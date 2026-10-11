@@ -1,80 +1,53 @@
 /*
     Author: mirrorsedgepro-stack
     Description:
-        Sets up the Mafia Syndicate HQ at the designated position.
-        Enforces a minimum distance buffer from the Rebel HQ (Petros / posHQ).
-        Spawns The Don (Syndicate Boss), Mafia Ammo Box, Syndicate Flag, and hideout assets.
+        Picks (or is given) the Syndicate hideout position. Nothing is spawned here: the hideout is
+        populated by A3UE_fnc_mafiaSpawnHQ when players come near.
+        A hideout is at least 2.5 km from the rebel HQ, 600 m from any military zone and 800 m from players.
     Parameters:
-        0: ARRAY - Proposed Position [x, y, z]
+        0: ARRAY - proposed position ([] to pick one near a random town)
+        1: BOOLEAN - accept the proposed position without the distance checks
     Returns:
-        BOOLEAN - Success or failure
+        BOOLEAN - true if a hideout was set
 */
 
-params [["_pos", [0,0,0], [[]]]];
+params [["_pos", [], [[]]], ["_force", false, [false]]];
 
 if (!isServer) exitWith { false };
 
-// 1. Enforce Minimum Distance Buffer from Rebel HQ (minimum 2500m)
-if (!isNil "posHQ") then {
-    private _dist = _pos distance2D posHQ;
-    if (_dist < 2500) exitWith {
-        ["Mafia HQ placement failed: Too close to Rebel HQ (Minimum 2.5km required).", "align='center' size='0.8' color='#ff4444'"] remoteExec ["A3A_fnc_customHint", remoteExecutedOwner];
-        false;
-    };
+private _rebHQ = getMarkerPos (missionNamespace getVariable ["respawnTeamPlayer", "respawn_guerrila"]);
+private _zones = [];
+{ _zones append (missionNamespace getVariable [_x, []]) } forEach ["airportsX", "outposts", "milbases", "resourcesX", "factories", "seaports"];
+private _players = (allPlayers - entities "HeadlessClient_F") select { alive _x };
+
+private _ok = {
+    params ["_p"];
+    count _p >= 2
+    && {!surfaceIsWater _p}
+    && {_p distance2D _rebHQ >= 2500}
+    && {(_zones findIf { (getMarkerPos _x) distance2D _p < 600 }) < 0}
+    && {(_players findIf { _x distance2D _p < 800 }) < 0}
 };
 
-A3UE_mafiaHQ = _pos;
-publicVariable "A3UE_mafiaHQ";
+if (_pos isEqualTo []) then {
+    for "_i" from 1 to 80 do {
+        private _try = [getMarkerPos (selectRandom citiesX), 350, 1100, 6, 0, 0.25, 0, [], [[0, 0], [0, 0]]] call BIS_fnc_findSafePos;
+        if (_try isNotEqualTo [0, 0] && {[_try] call _ok}) exitWith { _pos = _try };
+    };
+} else {
+    if (!_force && {!([_pos] call _ok)}) then { _pos = [] };
+};
 
-// 2. Clean up previous Mafia HQ assets if relocating
-if (!isNull A3UE_theDon) then { deleteVehicle A3UE_theDon; };
-if (!isNull A3UE_mafiaBox) then { deleteVehicle A3UE_mafiaBox; };
+if (_pos isEqualTo []) exitWith {
+    diag_log text "A3UE|error|no valid hideout position found";
+    false
+};
 
-// 3. Create Syndicate Boss (The Don)
-private _group = createGroup [civilian, true];
-private _don = _group createUnit ["C_Man_Formal_1_F", _pos, [], 0, "NONE"];
-_don setSkill 1;
-_don setRank "COLONEL";
-_don setName ["Don Salvatore", "Don", "Salvatore"];
-_don setVariable ["A3UE_isDon", true, true];
-_don forceAddUniform "U_C_FormalSuit_01_black_F";
-_don addHeadgear "H_Hat_checker";
-_don addWeapon "hgun_Pistol_heavy_02_F";
-_don addMagazine "6Rnd_45ACP_Cylinder";
-_don addMagazine "6Rnd_45ACP_Cylinder";
-_don addWeapon "Binocular";
-_don linkItem "ItemMap";
-_don linkItem "ItemCompass";
-_don linkItem "ItemWatch";
+["despawn"] call A3UE_fnc_mafiaSpawnHQ;
+A3UE_mafiaHQ = [_pos select 0, _pos select 1, 0];
+A3UE_mafiaHQKnown = false;
+deleteMarker "A3UE_mafiaHQ";
 
-_don addEventHandler ["Killed", {
-    params ["_unit", "_killer", "_instigator"];
-    [_unit, _killer, _instigator] call A3UE_fnc_mafiaBossKilled;
-}];
-
-A3UE_theDon = _don;
-publicVariable "A3UE_theDon";
-
-// 4. Create Mafia Ammo Box / Arsenal Crate
-private _boxPos = _pos getPos [3, 45];
-private _box = createVehicle ["Box_Syndicate_Wps_F", _boxPos, [], 0, "CAN_COLLIDE"];
-clearMagazineCargoGlobal _box;
-clearWeaponCargoGlobal _box;
-clearItemCargoGlobal _box;
-clearBackpackCargoGlobal _box;
-
-_box setVariable ["A3UE_isMafiaBox", true, true];
-A3UE_mafiaBox = _box;
-publicVariable "A3UE_mafiaBox";
-
-// 5. Create Syndicate Flag
-private _flagPos = _pos getPos [3, 315];
-private _flag = createVehicle ["Flag_Altis_F", _flagPos, [], 0, "CAN_COLLIDE"];
-_flag setFlagTexture "a3\data_f\flags\flag_altis_co.paa";
-_flag setVariable ["A3UE_isMafiaFlag", true, true];
-
-// 6. Broadcast notification
-["The Mafia Syndicate has established their family hideout.", "align='center' size='0.8' color='#a855f7'"] remoteExec ["A3A_fnc_customHint", 0];
-
-diag_log format ["[A3UE] Mafia HQ established at %1. The Don spawned.", _pos];
-true;
+["hq", [mapGridPosition A3UE_mafiaHQ], "Word on the street: the Syndicate has gone to ground in a new hideout somewhere on the island."] call A3UE_fnc_mafiaNotify;
+["save"] call A3UE_fnc_mafiaState;
+true

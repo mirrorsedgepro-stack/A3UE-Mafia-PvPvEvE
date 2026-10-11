@@ -4,16 +4,16 @@
   "publishedfileid" "0"
   "contentfolder" "./build/@A3UE_Mafia"
   "previewfile" "./build/@A3UE_Mafia/preview.png"
-  "visibility" "0"
+  "visibility" "2"
   "title" "Antistasi Ultimate - Mafia PvPvEvE Extender"
-  "description" "An official-grade Extender for Antistasi Ultimate introducing a 4-way PvPvEvE conflict across the map.
+  "description" "Adds a crime family, the Mafia Syndicate, to Antistasi Ultimate.
 
-Key Features:
-- 4-Way Engine Hostility: BLUFOR (Occupants), OPFOR (Invaders), INDEP (Rebels), and CIV (The Mafia Syndicate).
-- Dual Parallel Progression & HQs: Independent headquarters for Petros and Don Salvatore with interactive HQ raiding.
-- Contested Cities & Rackets: Dynamically split town support percentages and protection rackets.
-- The Mafia Syndicate Faction: Complete template with low-tier starter weapons, formal/casual mobster attire, and syndicate vehicles.
-- Global War Level & Targeted Aggro: AI QRFs respond specifically to whichever faction provoked them.
+- A hidden hideout with Don Salvatore and his guards. Find it, raid its stash, kill the Don.
+- Protection rackets that spread through towns where the rebels are weak. Kill the collectors to break them.
+- Hit squads that come after whoever raids the family.
+- Runs on the server: works on an existing campaign, and as a server mod players need nothing extra.
+- Two faction templates for new campaigns: the Mafia as the rebel faction, or as the rival faction.
+- Experimental: players can join the Syndicate (off by default).
 
 Requirements:
 - Arma 3 (v2.06+)

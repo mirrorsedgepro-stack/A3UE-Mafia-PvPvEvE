@@ -16,15 +16,4 @@ class CfgPatches
     };
 };
 
-//the pre proccessor ifs are there to make sure we overwrite/add to the correct config
-class A3A 
-{
-    #if __A3_DEBUG__
-        #include "CfgFunctions.hpp"
-    #endif
-};
-
-#if __A3_DEBUG__
-#else
-    #include "CfgFunctions.hpp"
-#endif
+#include "cfgFunctions.hpp"
