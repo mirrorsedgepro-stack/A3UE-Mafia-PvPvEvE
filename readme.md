@@ -92,7 +92,26 @@ This repository is fully configured for [estchd/arma_mod_packing](https://github
 
 ### Method 3: Default Extender Scripts
 1. Run `Install.ps1` to configure your build environment.
-2. Run `Build.ps1` to compile the addons into `.pbo` files.
+---
+
+## Publishing to Steam Workshop
+
+### Option A: Official Arma 3 Tools Publisher (Recommended GUI)
+1. Open **Arma 3 Tools** from your Steam Library.
+2. Launch **Publisher**.
+3. Select Mod: point to `build/@A3UE_Mafia`.
+4. Load the included preview image: `build/@A3UE_Mafia/preview.png`.
+5. Enter title: `Antistasi Ultimate - Mafia PvPvEvE Extender`.
+6. Click **Publish**.
+
+### Option B: Automated SteamCMD (CLI)
+A pre-configured [`workshop_item.vdf`](workshop_item.vdf) is included in the root directory.
+- On Windows: Run `Tools\publish_workshop.bat`.
+- On Linux: Run `./Tools/publish_workshop.sh`.
+- Or run SteamCMD directly:
+  ```bash
+  steamcmd +login <your_username> +workshop_build_item workshop_item.vdf +quit
+  ```
 
 ---
 
