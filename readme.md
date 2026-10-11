@@ -67,13 +67,30 @@ A3UE/
 
 ## How to Build and Install
 
-### Method 1: VSCode / Arma Dev
+### Method 1: arma_mod_packing (Recommended)
+This repository is fully configured for [estchd/arma_mod_packing](https://github.com/estchd/arma_mod_packing) with pre-configured `pbo.json` files for each addon, `.modignore`, `.convertignore`, and `path.json`.
+
+1. Download the latest release from [estchd/arma_mod_packing Releases](https://github.com/estchd/arma_mod_packing/releases).
+2. Validate configurations or pack directly:
+   ```bash
+   # Validate config
+   python3 Tools/pack_arma_mod.py --validate-only
+
+   # Pack mod with arma_tools_mod_packing
+   arma_tools_mod_packing.exe --source ./A3UE --destination ./build/@A3UE_Mafia --pack --path_json path.json
+   ```
+   Or use the included PowerShell wrapper:
+   ```powershell
+   .\Tools\Pack-ArmaMod.ps1
+   ```
+
+### Method 2: VSCode / Arma Dev
 1. Open this repository in [Visual Studio Code](https://code.visualstudio.com/).
 2. Install the **Arma Dev** extension (`ole1986.arma-dev`).
 3. Press `Ctrl + Shift + P` and execute **Arma 3: Build**.
 4. Add the generated `build` folder to your Arma 3 Launcher as a local mod.
 
-### Method 2: PowerShell Scripts
+### Method 3: Default Extender Scripts
 1. Run `Install.ps1` to configure your build environment.
 2. Run `Build.ps1` to compile the addons into `.pbo` files.
 

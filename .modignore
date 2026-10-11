@@ -1,0 +1,10 @@
+.git/
+.gitignore
+Tools/
+images/
+*.md
+*.ps1
+*.py
+*.sh
+.vscode/
+build/

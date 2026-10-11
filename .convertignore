@@ -1,0 +1,17 @@
+pbo.json
+key.json
+path.json
+*.bikey
+*.biprivkey
+*.bisign
+*.wss
+*.sqf
+*.hpp
+*.inc
+*.xml
+*.paa
+*.ogg
+texHeaders.bin
+mod.cpp
+meta.cpp
+$PBOPREFIX$
