@@ -27,7 +27,7 @@ def create_pbo(source_folder, output_pbo_path, prefix=None):
     Packs a folder into a standard Arma 3 PBO archive with SHA-1 checksum.
     """
     files_to_pack = []
-    ignored_names = {"pbo.json", "key.json", ".git", ".gitignore", ".DS_Store"}
+    ignored_names = {"pbo.json", "key.json", "$PBOPREFIX$", ".git", ".gitignore", ".DS_Store"}
 
     for root, dirs, files in os.walk(source_folder):
         dirs[:] = [d for d in dirs if d not in ignored_names]
@@ -53,8 +53,6 @@ def create_pbo(source_folder, output_pbo_path, prefix=None):
     # Properties
     if prefix:
         header_bytes.extend(b"prefix\x00" + prefix.encode("utf-8") + b"\x00")
-    header_bytes.extend(b"product\x00A3UE_Mafia\x00")
-    header_bytes.extend(b"version\x001.0.0\x00")
     header_bytes.extend(b"\x00") # end of properties
 
     # Read all file contents and build entries
@@ -71,7 +69,8 @@ def create_pbo(source_folder, output_pbo_path, prefix=None):
 
     for arma_rel_path, data_len, mtime in file_entries:
         header_bytes.extend(arma_rel_path.encode("utf-8") + b"\x00")
-        header_bytes.extend(struct.pack("<IIIII", 0, data_len, 0, mtime, data_len))
+        # Stored (uncompressed) entries carry 0 as their original size: the layout Arma's own tools write.
+        header_bytes.extend(struct.pack("<IIIII", 0, 0, 0, mtime, data_len))
 
     # End of headers: 21 null bytes
     header_bytes.extend(b"\x00" + struct.pack("<IIIII", 0, 0, 0, 0, 0))
